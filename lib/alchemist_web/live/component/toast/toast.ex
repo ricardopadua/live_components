@@ -1,6 +1,8 @@
 defmodule AlchemistWeb.Live.Component.Toast do
   use Phoenix.LiveComponent
 
+  alias Heroicons.Solid, as: Icon
+
   # prop title, :string
   # prop content, :string
   # prop duration, :string, time in milliseconds
@@ -24,8 +26,8 @@ defmodule AlchemistWeb.Live.Component.Toast do
       |> assign_new(:content, fn -> nil end)
       |> assign_new(:duration, fn -> "3000" end)
       |> assign_new(:position, fn -> "top-right" end)
-      |> assign_new(:type, fn -> "info" end)
-      |> assign_new(:icon, fn -> toast_icon(assigns) end)
+      |> assign_new(:type, fn -> "custom" end)
+      |> assign_new(:icon, fn -> nil end)
       |> assign_new(:classes, fn -> toast_classes(assigns) end)
       |> toast()
   end
@@ -49,7 +51,7 @@ defmodule AlchemistWeb.Live.Component.Toast do
         @click="remove(notice.id)"
         style="pointer-events:all"
         class="<%= @classes.toast %>"  role="toast">
-          <%= @icon %>
+        <%= toast_icon(assigns) %>
           <div class="<%= @classes.wrapper_content %>">
             <span class="<%= @classes.title %>"><%= @title %></span>
             <div class="<%= @classes.content_text %>"><%= @content %></div>
@@ -99,9 +101,9 @@ defmodule AlchemistWeb.Live.Component.Toast do
       "info" ->
         %{
           toast:
-            "mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-blue-700 rounded-md shadow text-sm bg-blue-100 dark:bg-blue-200 dark:text-blue-800",
+            "border-l-4 border-blue-600 mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-blue-700 rounded-md shadow-md text-sm bg-blue-100 dark:bg-blue-200 dark:text-blue-800",
           wrapper_content: "ml-3 text-sm font-normal",
-          title: "mb-1 text-sm font-semibold dark:text-white text-blue-900",
+          title: "mb-1 text-sm font-semibold text-blue-700 dark:text-blue-800",
           content_text: "mb-2 text-sm font-normal text-blue-700 dark:text-blue-800",
           content_divider: "mb-2 text-sm font-normal",
           close_button:
@@ -111,9 +113,9 @@ defmodule AlchemistWeb.Live.Component.Toast do
       "success" ->
         %{
           toast:
-            "mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-green-700 rounded-md shadow text-sm bg-green-100 dark:bg-green-200 dark:text-green-800",
+            "border-l-4 border-green-400 mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-green-700 rounded-md shadow-md text-sm bg-green-100 dark:bg-green-200 dark:text-green-800",
           wrapper_content: "ml-3 text-sm font-normal",
-          title: "mb-1 text-sm font-semibold dark:text-white text-green-900",
+          title: "mb-1 text-sm font-semibold text-green-700 dark:text-green-800",
           content_text: "mb-2 text-sm font-normal text-green-700 dark:text-green-800",
           content_divider: "mb-2 text-sm font-normal",
           close_button:
@@ -123,9 +125,9 @@ defmodule AlchemistWeb.Live.Component.Toast do
       "warning" ->
         %{
           toast:
-            "mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-yellow-700 rounded-md shadow text-sm bg-yellow-100 dark:bg-yellow-200 dark:text-yellow-800",
+            "border-l-4 border-yellow-400 mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-yellow-700 rounded-md shadow-md text-sm bg-yellow-100 dark:bg-yellow-200 dark:text-yellow-800",
           wrapper_content: "ml-3 text-sm font-normal",
-          title: "mb-1 text-sm font-semibold dark:text-white text-yellow-900",
+          title: "mb-1 text-sm font-semibold text-yellow-700 dark:text-yellow-800",
           content_text: "mb-2 text-sm font-normal text-yellow-700 dark:text-yellow-800",
           content_divider: "mb-2 text-sm font-normal",
           close_button:
@@ -135,9 +137,9 @@ defmodule AlchemistWeb.Live.Component.Toast do
       "error" ->
         %{
           toast:
-            "mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-red-700 rounded-md shadow text-sm bg-red-100 dark:bg-red-200 dark:text-red-800",
+            "border-l-4 border-red-600 mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-red-700 rounded-md shadow-md text-sm bg-red-100 dark:bg-red-200 dark:text-red-800",
           wrapper_content: "ml-3 text-sm font-normal",
-          title: "mb-1 text-sm font-semibold dark:text-white text-red-900",
+          title: "mb-1 text-sm font-semibold text-red-700 dark:text-red-800",
           content_text: "mb-2 text-sm font-normal text-red-700 dark:text-red-800",
           content_divider: "mb-2 text-sm font-normal",
           close_button:
@@ -147,25 +149,27 @@ defmodule AlchemistWeb.Live.Component.Toast do
       _ ->
         %{
           toast:
-            "mb-4 mr-6 flex items-center w-full max-w-xs p-4 space-x-4 text-blue-700 rounded-md shadow text-sm bg-blue-100 dark:bg-blue-200 dark:text-blue-800",
+            "border-l-4 border-gray-400 mb-2 mt-2 ml-4 mr-4 flex items-center w-full max-w-xs p-4 space-x-4 text-white-700 rounded-md shadow-md text-sm bg-white-100 dark:bg-white-200 dark:text-white-800",
           wrapper_content: "ml-3 text-sm font-normal",
-          title: "mb-1 text-sm font-semibold dark:text-white text-blue-900",
-          content_text: "mb-2 text-sm font-normal text-blue-700 dark:text-blue-800",
+          title: "mb-1 text-sm font-semibold text-gray-700 dark:text-gray-800",
+          content_text: "mb-2 text-sm font-normal text-gray-500 dark:text-gray-800",
           content_divider: "mb-2 text-sm font-normal",
           close_button:
-            "ml-auto -mx-1.5 -my-1.5 bg-blue-100 dark:bg-blue-200 text-blue-500 rounded-lg focus:ring-2 focus:ring-blue-400 p-1.5 hover:bg-blue-200 dark:hover:bg-blue-300 inline-flex h-8 w-8"
+            "ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 inline-flex h-8 w-8"
         }
     end
   end
 
-  defp toast_position("top-right"), do: "fixed inset-0 flex flex-col-reverse items-end justify-end h-screen w-screen"
-  defp toast_position("middle-right"), do: "fixed inset-0 flex flex-col-reverse items-end justify-start h-screen w-screen"
   defp toast_position("top-left"), do: "fixed inset-0 flex flex-col-reverse items-start justify-end h-screen w-screen"
+  defp toast_position("top-center"), do: "fixed inset-0 flex flex-col-reverse items-center justify-end h-screen w-screen"
+  defp toast_position("top-right"), do: "fixed inset-0 flex flex-col-reverse items-end justify-end h-screen w-screen"
   defp toast_position("middle-left"), do: "fixed inset-0 flex flex-col-reverse items-start justify-start h-screen w-screen"
+  defp toast_position("middle-center"), do: "fixed inset-0 flex flex-col-reverse items-center justify-start h-screen w-screen"
+  defp toast_position("middle-right"), do: "fixed inset-0 flex flex-col-reverse items-end justify-start h-screen w-screen"
 
-  defp toast_icon(%{type: "info"}), do: "💁"
-  defp toast_icon(%{type: "success"}), do: "👌"
-  defp toast_icon(%{type: "warning"}), do: "🔥"
-  defp toast_icon(%{type: "error"}), do: "😵"
-  defp toast_icon(_), do: "💅"
+  defp toast_icon(%{type: "info"}), do: Icon.information_circle(%{class: "h-12 w-12 text-blue-600"})
+  defp toast_icon(%{type: "success"}), do: Icon.check_circle(%{class: "h-12 w-12 text-green-400"})
+  defp toast_icon(%{type: "warning"}), do: Icon.exclamation_circle(%{class: "h-12 w-12 text-yellow-400"})
+  defp toast_icon(%{type: "error"}), do: Icon.x_circle(%{class: "h-12 w-12 text-red-600"})
+  defp toast_icon(assigns), do: if assigns.icon, do: Icon.render(assigns.icon), else: Icon.render(%{icon: :chat_alt, class: "h-12 w-12 text-gray-400"})
 end
