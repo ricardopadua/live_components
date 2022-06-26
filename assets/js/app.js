@@ -26,6 +26,8 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+import {InitToast} from "./hooks/init_toast"
+
 // let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 // let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
 
@@ -33,36 +35,7 @@ import topbar from "../vendor/topbar"
 window.Alpine = Alpine;
 Alpine.start();
 let hooks = {};
-hooks.Toast = {
-  mounted() {
-
-    function noticesHandler() {
-      return {
-        notices: [],
-        visible: [],
-        add(notice) {
-          notice.id = Date.now()
-          this.notices.push(notice)
-          this.fire(notice.id)
-        },
-      
-        fire(id) {
-          this.visible.push(this.notices.find(notice => notice.id == id))
-          const timeShown = 2000 * this.visible.length
-          setTimeout(() => {
-            this.remove(id)
-            }, timeShown)
-        },
-      
-        remove(id) {
-          const notice = this.visible.find(notice => notice.id == id)
-          const index = this.visible.indexOf(notice)
-          this.visible.splice(index, 1)
-        },
-      }
-    }
-  }
-}
+hooks.InitToast = InitToast
 
 
 
@@ -78,7 +51,6 @@ let liveSocket = new LiveSocket("/live", Socket, {
     },
   },
 });
-
 
 
 // Show progress bar on live navigation and form submits
