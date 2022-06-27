@@ -10,48 +10,36 @@ defmodule AlchemistWeb.Live.Component.Toast do
   # prop type, :string, options: ["info", "success", "warning", "error"]
 
   defmodule Message do
-    defstruct id: 1, title: "", content: "", type: "info", icon: "", classes: "", visible: false
+    defstruct id: System.monotonic_time() |> Integer.to_string() |> String.to_atom(),
+              title: "",
+              content: "",
+              type: "info",
+              icon: "",
+              classes: ""
   end
 
-  def types() do
-    %{
-      title: nil,
-      content: nil,
-      type: "info"
-    }
-  end
-
-  def mount(socket) do
-    IO.inspect(socket, label: "mount => socket")
-    socket =
-      socket
-      |> assign(:title, nil)
-      |> assign(:content, nil)
-      |> assign(:duration, "3000")
-      |> assign(:position, "top-right")
-      |> assign(:type, "info")
-      |> assign(:icon, nil)
-      |> assign(:messages, [])
-      |> assign(:visible, false)
-      |> assign(:classes, toast_classes(%{type: "info"}))
-
-    {:ok, socket}
-  end
-
-  def update(assings, socket) do
-    {:ok, socket |> assign(:messages, assings.messages)}
-
+  def update(assigns, socket) do
+    {:ok, socket |> assign(assigns)}
   end
 
   def render(assigns) do
+    assigns
+    |> assign_new(:duration, fn -> 3000 end)
+    |> assign_new(:position, fn -> "top-right" end)
+    |> assign_new(:messages, fn -> [] end)
+    |> toast()
+  end
+
+  defp toast(assigns) do
     ~L"""
     <div id="toast"
     class="<%= toast_position(@position) %>"
-    @notice.window="add($event.detail)"
     style="pointer-events:none">
       <%= for message <- @messages do %>
         <div id="<%= message.id %>"
-        x-show="<%= message.visible %>"
+        x-data="{show: <%= length(@messages) > 0 %>}"
+        x-show="show"
+        x-init="setTimeout(() => show = false, <%= @duration %>)"
         x-transition:enter="transition ease-in duration-200"
         x-transition:enter-start="transform opacity-0 translate-y-2"
         x-transition:enter-end="transform opacity-100"
@@ -61,20 +49,17 @@ defmodule AlchemistWeb.Live.Component.Toast do
         style="pointer-events:all"
         class="<%= message.classes.toast %>"  role="toast">
         <%= message.icon %>
-          <div class="<%= @classes.wrapper_content %>">
+          <div class="<%= message.classes.wrapper_content %>">
             <span class="<%= message.classes.title %>"><%= message.title %></span>
             <div class="<%= message.classes.content_text %>"><%= message.content %></div>
             <div class="<%= message.classes.content_divider %>"></div>
           </div>
-
-          <button id="remove_<%= message.id %>" type="button" phx-click="remove" class="<%= message.classes.close_button %>" data-dismiss-target="#alert-border-1" aria-label="Close">
+          <button id="remove_<%= message.id %>" type="button" class="<%= message.classes.close_button %>" data-dismiss-target="#alert-border-1" aria-label="Close">
             <span class="sr-only">Dismiss</span>
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
           </button>
-
         </div>
-        <% end %>
-
+      <% end %>
     </div>
     """
   end
@@ -171,16 +156,19 @@ defmodule AlchemistWeb.Live.Component.Toast do
 
   defp toast_icon(%{type: "error"}), do: Icon.x_circle(%{class: "h-12 w-12 text-red-600"})
 
-  def handle_event("remove", socket) do
+  def handle_event("remove_message", socket) do
     {:noreply, socket}
+  end
+
+  def create_key() do
+    System.monotonic_time() |> Integer.to_string() |> String.to_atom()
   end
 
   def info(%{title: title, content: content}) do
     %Message{
-      id: 1,
+      id: create_key(),
       title: title,
       content: content,
-      visible: true,
       icon: toast_icon(%{type: "info"}),
       classes: toast_classes(%{type: "info"})
     }
@@ -188,10 +176,9 @@ defmodule AlchemistWeb.Live.Component.Toast do
 
   def success(%{title: title, content: content}) do
     %Message{
-      id: 1,
+      id: create_key(),
       title: title,
       content: content,
-      visible: true,
       icon: toast_icon(%{type: "success"}),
       classes: toast_classes(%{type: "success"})
     }
@@ -199,10 +186,9 @@ defmodule AlchemistWeb.Live.Component.Toast do
 
   def warning(%{title: title, content: content}) do
     %Message{
-      id: 1,
+      id: create_key(),
       title: title,
       content: content,
-      visible: true,
       icon: toast_icon(%{type: "warning"}),
       classes: toast_classes(%{type: "warning"})
     }
@@ -210,10 +196,9 @@ defmodule AlchemistWeb.Live.Component.Toast do
 
   def error(%{title: title, content: content}) do
     %Message{
-      id: 1,
+      id: create_key(),
       title: title,
       content: content,
-      visible: true,
       icon: toast_icon(%{type: "error"}),
       classes: toast_classes(%{type: "error"})
     }
